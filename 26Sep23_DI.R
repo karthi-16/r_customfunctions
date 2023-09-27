@@ -167,7 +167,7 @@ rf.ids <- intersect(colnames(genus.c), rownames(cloud.results))
 rd.ids <- sort(rf.ids)
 genus.clr <- t(genus.c[, rf.ids])
 dim(genus.clr)
-
+# We have done CLR transform for OTU table, no need to use rare oTUs
 # # R function for removing rare OTU's
 # remove_rare <- function( table , cutoff_pro ) {
 #   row2keep <- c()
@@ -244,7 +244,7 @@ hm.meta <- data.frame(fullmap2[,'dys_class'], row.names = rownames(fullmap2), co
 hm.meta$col[hm.meta$col==TRUE] <- '#E69F00'
 hm.meta$col[hm.meta$col==FALSE] <- '#009E73'
 
-# modifying the featutres ids
+# modifying the features ids
 features_ids<- colnames(sig.genera.clr)
 # Extract the last word based on the presence of "g__" 
 last_words_boruta <- sapply(features_ids, function(str) {
@@ -267,7 +267,7 @@ sig<- data.frame(dys_class= hm.meta$fullmap2....dys_class.., sig.genera.clr, sam
 #                names_to = "feature_name", 
 #                values_to = "feature_value")
 
-## data transform with melty
+## data transform with melt using tidyr package 
 long_data_boruta<- melt(sig)
 # ggplot heatmap
 ## ---- chunk-4 ---
@@ -336,6 +336,8 @@ dev.off()
 #   cex = 0.9 # Adjust the size of the legend text
 # )
 # dev.off()
+
+                   
 ## ggplot heatmap with sampelids
 
 long_data_boruta$sampleid <- factor(long_data_boruta$sampleid, levels = unique(sig$sampleid))
@@ -430,7 +432,7 @@ rownames<- rownames(importance_scores_first_model)
 importance_df <- as.data.table(importance_scores_first_model)
 importance_df$row_ids <- rownames
 
-# Sort importance scores in descending order and select the top 62 markers
+# Sort importance scores in descending order and select the top 65 markers
 top_65_markers <- head(importance_df[order(-importance_df$Overall), ], 65)
 top_65_markers_names<- top_65_markers$row_ids
 
@@ -526,7 +528,7 @@ top_65_markers_names<- top_65_markers$row_ids
 
 ### heatmap with sampleids
 
-## extracting the top 62 features from rf to plot the heatmap for relative abundances
+## extracting the top 65 features from rf to plot the heatmap for relative abundances
 # Plot the features as heatmap
 genera.clr <- genus_df[, colnames(genus_df) %in% top_65_markers_names]
 # making ids for dys class
@@ -543,7 +545,7 @@ hm.meta_rf <- data.frame(fullmap_rf[,'dys_class'], row.names = rownames(fullmap_
 hm.meta_rf$col[hm.meta_rf$col==TRUE] <- '#E69F00'
 hm.meta_rf$col[hm.meta_rf$col==FALSE] <- '#009E73'
 
-# modifying the featutres ids
+# modifying the features ids
 features_ids_rf<- colnames(genera.clr_rf)
 # Extract the last word based on the presence of "g__" 
 last_words_boruta_rf <- sapply(features_ids_rf, function(str) {
@@ -566,9 +568,6 @@ sig_rf<- data.frame(dys_class= hm.meta_rf$fullmap_rf....dys_class.., genera.clr_
 #                names_to = "feature_name", 
 #                values_to = "feature_value")
 # 
-## ---- chunk-4 ---
-color_breaks <- c(0.00, 2.5, 7.5, 10.5)
-custom_colors <- c("#8bd3c7", "#b2e061", "#fdcce5", "#fd7f6f")  # Replace with your desired colors
 
 ## ggplot heatmap
 
@@ -581,6 +580,9 @@ long_rf$sampleid <- factor(long_rf$sampleid, levels = unique(sig_rf$sampleid))
 
 ## segment
 # Create the heatmap plot with selected sample IDs as lines
+## ---- chunk-4 ---
+color_breaks <- c(0.00, 2.5, 7.5, 10.5)
+custom_colors <- c("#8bd3c7", "#b2e061", "#fdcce5", "#fd7f6f")  # Replace with your desired colors
 heatmap_dys <- ggplot(long_rf, aes(x = sampleid, y = reorder(variable, -value), fill = value)) +
   geom_tile(color = "white") +
   scale_fill_gradientn(breaks = color_breaks, colors = custom_colors, guide = "legend") +
